@@ -4,3 +4,7 @@ TestResults/
 .vs/
 .env
 *.user
+frontend/node_modules/
+frontend/playwright-report/
+frontend/test-results/
+wwwroot/demo/

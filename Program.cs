@@ -19,6 +19,10 @@ app.UseApiErrorHandling();
 app.UseApiResponseHeaders();
 app.UseRequiredHttps();
 
+// Serve the built playground before API rate limiting; scoring still requires an API key.
+app.UseDefaultFiles();
+app.UseStaticFiles();
+
 app.UseRouting();
 app.UseRequestTimeouts();
 app.UseAuthentication();

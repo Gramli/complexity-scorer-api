@@ -1,6 +1,7 @@
 using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
+using ComplexityScorer.Configuration;
 using ComplexityScorer.Services;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
@@ -61,9 +62,20 @@ internal sealed class ApiFactory(Dictionary<string, string?>? overrides = null) 
                 settings[pair.Key] = pair.Value;
             config.AddInMemoryCollection(settings);
         });
-        builder.ConfigureServices(services => services
-            .AddHttpClient<IComplexityScorer, TinkerComplexityScorer>()
-            .ConfigurePrimaryHttpMessageHandler(() => Tinker));
+        builder.ConfigureServices(services =>
+        {
+            // Tests own their credentials; never merge real or placeholder client keys.
+            services.PostConfigure<ApiOptions>(options =>
+            {
+                options.Clients = new() { ["first"] = Key, ["second"] = OtherKey };
+                const string prefix = "Api:Clients:";
+                foreach (var pair in overrides ?? [])
+                    if (pair.Key.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
+                        options.Clients[pair.Key[prefix.Length..]] = pair.Value ?? "";
+            });
+            services.AddHttpClient<IComplexityScorer, TinkerComplexityScorer>()
+                .ConfigurePrimaryHttpMessageHandler(() => Tinker);
+        });
     }
 
     public HttpClient Client(string? key = Key)

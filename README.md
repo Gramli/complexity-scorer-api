@@ -108,6 +108,44 @@ The score is rounded to two decimal places. JSON tools may display `0.50` as `0.
 
 If you closed the first window, repeat step 2 to generate a new key, restart the API, and use the new key for your request.
 
+## Try the Svelte playground
+
+The small demo at `https://localhost:7092/demo/` lets you type or paste **your own prompt**, load and edit an example, and see the actual score on an animated meter. An expandable inspector shows the last JSON request and response, with authentication headers excluded.
+
+Install **Node.js 24 LTS** as well as the .NET SDK. After configuring the API keys above, build the frontend from the repository root:
+
+```powershell
+npm --prefix frontend ci
+npm --prefix frontend run build
+dotnet run --project complexity-scorer-api.csproj --launch-profile https
+```
+
+Open `https://localhost:7092/demo/`, expand **Connection settings**, and paste a dedicated **caller API key** registered under `Api:Clients`. Type a prompt and select **Analyze complexity**, or press `Ctrl+Enter` (`Cmd+Enter` on macOS). Example buttons only fill the editor; you can edit or replace their text before submitting.
+
+The caller key stays in page memory and is cleared on refresh; it is not bundled or saved in browser storage. A browser user can inspect their own outgoing key, so use a dedicated demo key. The Tinker key stays on the server. Prompts and responses are kept in this tab until refresh, and there are no automatic scoring retries.
+
+The page calls `/api/complexity` on the same origin, retaining API-key authentication and API rate limits. It accepts up to the default 8,000-character prompt limit; the API remains authoritative if you configure stricter limits. The display labels the nearest of the five rubric reference points, while preserving the actual numerical score. A score estimates reasoning effort; it is not the answer to the submitted prompt.
+
+Frontend source lives in `frontend/`. Vite writes compiled HTML/CSS/JavaScript into `wwwroot/demo/`; rebuild after frontend edits and before `dotnet publish`. Generated assets and `node_modules` are ignored by Git. Node is only needed to develop or build the frontend, not to serve the compiled page.
+
+For frontend development with live reload, keep the API running and use a second terminal:
+
+```powershell
+npm --prefix frontend run dev
+```
+
+Open the printed `/demo/` URL. Vite proxies `/api` to the local HTTPS API; its development proxy accepts the local development certificate. Production requests go directly to the same-origin API.
+
+Frontend validation and browser tests:
+
+```powershell
+npm --prefix frontend run check
+npm --prefix frontend run build
+npm --prefix frontend test
+```
+
+Browser tests use installed Microsoft Edge in headless mode and simulate API responses, so they do not call Tinker. They verify arbitrary user prompts, editing examples, keyboard submission, API-key handling, error states, retry delays, safe text rendering, and mobile layout. To use another installed browser or Playwright Chromium, adjust `frontend/playwright.config.ts` accordingly. The .NET tests also verify that demo hosting preserves HTTPS and API authentication.
+
 ## Call the endpoint from another tool
 
 For Postman or another HTTP client, use:
