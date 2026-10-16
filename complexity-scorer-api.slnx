@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="complexity-scorer-api.csproj" />
+  <Project Path="tests/ComplexityScorer.Tests/ComplexityScorer.Tests.csproj" />
+</Solution>

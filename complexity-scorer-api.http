@@ -1,0 +1,15 @@
+# Start the API first: dotnet run --project complexity-scorer-api.csproj --launch-profile https
+# Wait for "Now listening on: https://localhost:7092" before sending this request.
+@HostAddress = https://localhost:7092
+# Set this to the caller key configured in Api:Clients (not the Tinker key).
+@ApiKey =
+
+POST {{HostAddress}}/api/complexity
+Content-Type: application/json
+X-Api-Key: {{ApiKey}}
+
+{
+  "prompt": "Extract the email address from this JSON: {\"email\":\"hello@example.com\"}"
+}
+
+###
